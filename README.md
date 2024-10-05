@@ -39,10 +39,3 @@ A web-based application designed to help librarians manage books, members, and t
 git clone https://github.com/deepak982/Library-Management
 cd library_management
 
-image.png
-
-![alt text](image-1.png)
-
-![alt text](image-2.png)
-
-![alt text](image-3.png)
