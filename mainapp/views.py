@@ -4,15 +4,40 @@ from django.db.models import Q
 from django.contrib import messages
 from django.utils import timezone
 from .models import Book, Member, Transaction
-from .forms import BookForm, MemberForm, TransactionForm, ImportBooksForm
+from .forms import BookForm, MemberForm, TransactionForm, ImportBooksForm, SignUpForm
 import datetime
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate, logout
+from django.contrib import messages
+
+# Signup View
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')  # Redirect authenticated users to home
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Optionally, log the user in immediately after signup
+            login(request, user)
+            messages.success(request, 'Your account has been created successfully!')
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('login')
 
 # Home Page
+@login_required
 def home(request):
     return render(request, 'home.html')
 
 # Book Views
-
+@login_required
 def book_list(request):
     query = request.GET.get('q')
     if query:
@@ -23,6 +48,7 @@ def book_list(request):
         books = Book.objects.all()
     return render(request, 'books/book_list.html', {'books': books, 'query': query})
 
+@login_required
 def book_create(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
@@ -34,6 +60,7 @@ def book_create(request):
         form = BookForm()
     return render(request, 'books/book_form.html', {'form': form})
 
+@login_required
 def book_update(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
@@ -46,6 +73,7 @@ def book_update(request, pk):
         form = BookForm(instance=book)
     return render(request, 'books/book_form.html', {'form': form, 'book': book})
 
+@login_required
 def book_delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
@@ -55,11 +83,12 @@ def book_delete(request, pk):
     return render(request, 'books/book_confirm_delete.html', {'book': book})
 
 # Member Views
-
+@login_required
 def member_list(request):
     members = Member.objects.all()
     return render(request, 'members/member_list.html', {'members': members})
 
+@login_required
 def member_create(request):
     if request.method == 'POST':
         form = MemberForm(request.POST)
@@ -71,6 +100,7 @@ def member_create(request):
         form = MemberForm()
     return render(request, 'members/member_form.html', {'form': form})
 
+@login_required
 def member_update(request, pk):
     member = get_object_or_404(Member, pk=pk)
     if request.method == 'POST':
@@ -83,6 +113,7 @@ def member_update(request, pk):
         form = MemberForm(instance=member)
     return render(request, 'members/member_form.html', {'form': form, 'member': member})
 
+@login_required
 def member_delete(request, pk):
     member = get_object_or_404(Member, pk=pk)
     if request.method == 'POST':
@@ -92,11 +123,12 @@ def member_delete(request, pk):
     return render(request, 'members/member_confirm_delete.html', {'member': member})
 
 # Transaction Views
-
+@login_required
 def transaction_list(request):
     transactions = Transaction.objects.select_related('member', 'book').all().order_by('-date')
     return render(request, 'transactions/transaction_list.html', {'transactions': transactions})
 
+@login_required
 def transaction_create(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST)
@@ -143,7 +175,7 @@ def transaction_create(request):
     return render(request, 'transactions/transaction_form.html', {'form': form})
 
 # Import Books from External API
-
+@login_required
 def import_books(request):
     if request.method == 'POST':
         form = ImportBooksForm(request.POST)
