@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="mt-5">Welcome to the Library Management System</h1>
+    <p class="lead">Manage books, members, and transactions efficiently.</p>
+    <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">Manage Books</a>
+    <a href="{% url 'member_list' %}" class="btn btn-secondary btn-lg">Manage Members</a>
+    <a href="{% url 'transaction_list' %}" class="btn btn-success btn-lg">View Transactions</a>
+</div>
+{% endblock %}

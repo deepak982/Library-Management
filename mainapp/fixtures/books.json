@@ -1,0 +1,122 @@
+[
+    {
+        "model": "mainapp.book",
+        "pk": 1,
+        "fields": {
+            "title": "The Great Gatsby",
+            "authors": "F. Scott Fitzgerald",
+            "isbn": "9780743273565",
+            "publisher": "Charles Scribner's Sons",
+            "num_pages": 180,
+            "stock": 5
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 2,
+        "fields": {
+            "title": "To Kill a Mockingbird",
+            "authors": "Harper Lee",
+            "isbn": "9780060935467",
+            "publisher": "J.B. Lippincott & Co.",
+            "num_pages": 281,
+            "stock": 3
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 3,
+        "fields": {
+            "title": "1984",
+            "authors": "George Orwell",
+            "isbn": "9780451524935",
+            "publisher": "Secker & Warburg",
+            "num_pages": 328,
+            "stock": 4
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 4,
+        "fields": {
+            "title": "Pride and Prejudice",
+            "authors": "Jane Austen",
+            "isbn": "9780141040349",
+            "publisher": "T. Egerton",
+            "num_pages": 279,
+            "stock": 2
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 5,
+        "fields": {
+            "title": "The Catcher in the Rye",
+            "authors": "J.D. Salinger",
+            "isbn": "9780316769488",
+            "publisher": "Little, Brown and Company",
+            "num_pages": 214,
+            "stock": 6
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 6,
+        "fields": {
+            "title": "The Hobbit",
+            "authors": "J.R.R. Tolkien",
+            "isbn": "9780547928227",
+            "publisher": "George Allen & Unwin",
+            "num_pages": 310,
+            "stock": 7
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 7,
+        "fields": {
+            "title": "Fahrenheit 451",
+            "authors": "Ray Bradbury",
+            "isbn": "9781451673319",
+            "publisher": "Ballantine Books",
+            "num_pages": 194,
+            "stock": 5
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 8,
+        "fields": {
+            "title": "Moby-Dick",
+            "authors": "Herman Melville",
+            "isbn": "9781503280786",
+            "publisher": "Harper & Brothers",
+            "num_pages": 635,
+            "stock": 2
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 9,
+        "fields": {
+            "title": "War and Peace",
+            "authors": "Leo Tolstoy",
+            "isbn": "9781853260629",
+            "publisher": "The Russian Messenger",
+            "num_pages": 1225,
+            "stock": 1
+        }
+    },
+    {
+        "model": "mainapp.book",
+        "pk": 10,
+        "fields": {
+            "title": "The Alchemist",
+            "authors": "Paulo Coelho",
+            "isbn": "9780061122415",
+            "publisher": "HarperTorch",
+            "num_pages": 208,
+            "stock": 4
+        }
+    }
+]

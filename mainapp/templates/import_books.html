@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h2>Import Books from External API</h2>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Import Books</button>
+    <a href="{% url 'book_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
