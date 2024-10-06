@@ -26,4 +26,7 @@ urlpatterns = [
 
     # Import Books
     path('import-books/', views.import_books, name='import_books'),
+    
+    # Dashboard
+    path('dashboard-data/', views.dashboard_data, name='dashboard_data')
 ]

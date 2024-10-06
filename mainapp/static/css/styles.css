@@ -1,3 +1,5 @@
+/* mainapp/static/css/styles.css */
+
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
@@ -11,6 +13,7 @@
   --navbar-color: #3498db;
   --card-background: #ffffff;
   --hover-color: #2980b9;
+  --border-color: #dddddd;
 }
 
 /* Global Styles */
@@ -195,7 +198,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--hover-color);
 }
 
-/* Media Queries for Responsive Design */
+/* Responsive Adjustments */
 @media only screen and (max-width: 768px) {
   .container {
     padding: 10px;
@@ -248,4 +251,95 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: none;
     border: 1px solid #ddd;
   }
+}
+
+/* Dashboard Specific Styles */
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard-title {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+}
+
+.number-cards .card {
+    text-align: center;
+    padding: 20px;
+    height: 120px; /* Reduced height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 15px;
+}
+
+.number-cards .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.number-cards .card .card-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.number-cards .card .card-text {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: black; /* Set text color to black */
+}
+
+.graphs .card {
+    /* Adjusted height via chart-container */
+}
+
+.chart-container {
+    position: relative;
+    height: 400px; /* Fixed height for the bar graph */
+    width: 100%;
+}
+
+.report-section .card-body {
+    padding: 20px;
+}
+
+.report-section .filter-section .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.report-section .filter-section .col-md-4 {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.report-section .table-responsive.table-scroll {
+    max-height: 400px; /* Ensures the table doesn't exceed this height */
+    overflow-y: auto;
+}
+
+.report-section .table th, .report-section .table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+.report-section .table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.report-section .table td {
+    color: var(--text-color);
+}
+
+/* Ensure "No data found" message stays within table boundaries */
+.report-section .table td.text-center {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-color);
 }

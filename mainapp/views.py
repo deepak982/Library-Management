@@ -9,6 +9,8 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
+from django.http import JsonResponse
+from django.db.models import Count
 
 # Signup View
 def signup_view(request):
@@ -32,9 +34,34 @@ def logout_view(request):
     return redirect('login')
 
 # Home Page
+
 @login_required
 def home(request):
-    return render(request, 'home.html')
+    # Get counts for number cards
+    total_books = Book.objects.count()
+    total_members = Member.objects.count()
+    total_transactions = Transaction.objects.count()
+    
+    # Get data for transactions graph (default: last 30 days, all types)
+    last_30_days = timezone.now() - datetime.timedelta(days=30)
+    transactions_by_day = (
+        Transaction.objects.filter(date__gte=last_30_days)
+        .values('date__date')  # Group by date only
+        .annotate(count=Count('id'))
+        .order_by('date__date')
+    )
+    
+    # Get data for report section (latest 10 transactions)
+    recent_transactions = Transaction.objects.all().order_by('-date')[:10]
+    
+    context = {
+        'total_books': total_books,
+        'total_members': total_members,
+        'total_transactions': total_transactions,
+        'transactions_by_day': list(transactions_by_day),
+        'recent_transactions': recent_transactions,
+    }
+    return render(request, 'home.html', context)
 
 # Book Views
 @login_required
@@ -232,3 +259,73 @@ def import_books(request):
     else:
         form = ImportBooksForm()
     return render(request, 'import_books.html', {'form': form})
+
+# AJAX Endpoint for Real-Time Dashboard Updates
+@login_required
+def dashboard_data(request):
+    # Common data
+    total_books = Book.objects.count()
+    total_members = Member.objects.count()
+    total_transactions = Transaction.objects.count()
+    
+    # Identify which section is requesting data
+    is_graph = request.GET.get('graph', 'false').lower() == 'true'
+    is_report = request.GET.get('report', 'false').lower() == 'true'
+    
+    data = {
+        'total_books': total_books,
+        'total_members': total_members,
+        'total_transactions': total_transactions,
+    }
+    
+    if is_graph:
+        # Get graph-specific filters
+        transaction_type = request.GET.get('transaction_type', 'all')
+        # Build filter conditions
+        graph_filters = {}
+        if transaction_type and transaction_type.lower() != 'all':
+            graph_filters['transaction_type__iexact'] = transaction_type.lower()
+        
+        # Get data for transactions graph
+        last_30_days = timezone.now() - datetime.timedelta(days=30)
+        transactions_by_day = (
+            Transaction.objects.filter(date__gte=last_30_days, **graph_filters)
+            .values('date__date')
+            .annotate(count=Count('id'))
+            .order_by('date__date')
+        )
+        
+        data['transactions_by_day'] = [
+            {'day': item['date__date'].strftime('%Y-%m-%d'), 'count': item['count']}
+            for item in transactions_by_day
+        ]
+    
+    if is_report:
+        # Get report-specific filters
+        transaction_type = request.GET.get('transaction_type', 'all')
+        start_date = request.GET.get('start_date', '')
+        end_date = request.GET.get('end_date', '')
+        
+        # Build filter conditions
+        report_filters = {}
+        if transaction_type and transaction_type.lower() != 'all':
+            report_filters['transaction_type__iexact'] = transaction_type.lower()
+        if start_date:
+            report_filters['date__date__gte'] = start_date
+        if end_date:
+            report_filters['date__date__lte'] = end_date
+        
+        # Get data for report section (latest 10 transactions based on filters)
+        recent_transactions = Transaction.objects.filter(**report_filters).order_by('-date')[:10]
+        
+        data['recent_transactions'] = [
+            {
+                'date': t.date.strftime('%Y-%m-%d %H:%M'),
+                'type': t.get_transaction_type_display(),
+                'book': t.book.title,
+                'member': t.member.name
+            }
+            for t in recent_transactions
+        ]
+    
+    return JsonResponse(data)

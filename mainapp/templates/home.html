@@ -1,11 +1,263 @@
+<!-- mainapp/templates/home.html -->
+
 {% extends 'index.html' %}
 
+{% load static %}
+
 {% block content %}
-<div class="text-center">
-    <h1 class="mt-5">Welcome to the Library Management System</h1>
-    <p class="lead">Manage books, members, and transactions efficiently.</p>
-    <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">Manage Books</a>
-    <a href="{% url 'member_list' %}" class="btn btn-secondary btn-lg">Manage Members</a>
-    <a href="{% url 'transaction_list' %}" class="btn btn-success btn-lg">View Transactions</a>
+<div class="dashboard fade-in">
+    <h1 class="dashboard-title">Library Management Dashboard</h1>
+    
+    <!-- Number Cards -->
+    <div class="number-cards row mb-4">
+        <div class="col-md-4 col-sm-6 mb-3">
+            <a href="{% url 'book_list' %}" class="card text-decoration-none">
+                <div class="card-body">
+                    <h5 class="card-title">Total Books</h5>
+                    <p class="card-text display-4 text-black" id="total-books">{{ total_books }}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-3">
+            <a href="{% url 'member_list' %}" class="card text-decoration-none">
+                <div class="card-body">
+                    <h5 class="card-title">Total Members</h5>
+                    <p class="card-text display-4 text-black" id="total-members">{{ total_members }}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-3">
+            <a href="{% url 'transaction_list' %}" class="card text-decoration-none">
+                <div class="card-body">
+                    <h5 class="card-title">Total Transactions</h5>
+                    <p class="card-text display-4 text-black" id="total-transactions">{{ total_transactions }}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Graph Section -->
+    <div class="graphs row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Transactions in Last 30 Days</h5>
+                    <div class="filter-section mb-3">
+                        <label for="graph-transaction-type" class="form-label">Filter by Type:</label>
+                        <select id="graph-transaction-type" class="form-select">
+                            <option value="all">All</option>
+                            <option value="issue">Issue</option>
+                            <option value="return">Return</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="transactionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Section -->
+    <div class="report-section card">
+        <div class="card-body">
+            <h3 class="card-title">Recent Transactions</h3>
+            <div class="filter-section mb-3">
+                <div class="row">
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <label for="report-transaction-type" class="form-label">Filter by Type:</label>
+                        <select id="report-transaction-type" class="form-select">
+                            <option value="all">All</option>
+                            <option value="issue">Issue</option>
+                            <option value="return">Return</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <label for="report-start-date" class="form-label">Start Date:</label>
+                        <input type="date" id="report-start-date" class="form-control" placeholder="Start Date">
+                    </div>
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <label for="report-end-date" class="form-label">End Date:</label>
+                        <input type="date" id="report-end-date" class="form-control" placeholder="End Date">
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive table-scroll">
+                <table class="table table-striped" id="recent-transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Book</th>
+                            <th>Member</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_transactions %}
+                            {% for transaction in recent_transactions %}
+                            <tr class="transaction-row" data-type="{{ transaction.get_transaction_type_display|lower }}">
+                                <td>{{ transaction.date|date:"Y-m-d H:i" }}</td>
+                                <td>{{ transaction.get_transaction_type_display }}</td>
+                                <td>{{ transaction.book.title }}</td>
+                                <td>{{ transaction.member.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No data found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Initialize the transactions bar chart
+    var ctx = document.getElementById('transactionsChart').getContext('2d');
+    var transactionsChart = new Chart(ctx, {
+        type: 'bar',  // Bar chart
+        data: {
+            labels: [{% for item in transactions_by_day %}'{{ item.day }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Transactions',
+                data: [{% for item in transactions_by_day %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,  // Allows manual height adjustment
+            plugins: {
+                legend: {
+                    display: false, // Hide legend if only one dataset
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision:0
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Transactions'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to update the graph
+    function updateGraph() {
+        var selectedType = $('#graph-transaction-type').val();
+        $.ajax({
+            url: "{% url 'dashboard_data' %}",
+            method: "GET",
+            data: {
+                'transaction_type': selectedType,
+                'graph': 'true'  // Identifier to fetch graph-specific data
+            },
+            dataType: "json",
+            success: function(data) {
+                // Update bar chart data
+                transactionsChart.data.labels = data.transactions_by_day.map(function(item) {
+                    return item.day;
+                });
+                transactionsChart.data.datasets[0].data = data.transactions_by_day.map(function(item) {
+                    return item.count;
+                });
+                transactionsChart.update();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching graph data:', error);
+            }
+        });
+    }
+
+    // Function to update the report
+    function updateReport() {
+        var selectedType = $('#report-transaction-type').val();
+        var startDate = $('#report-start-date').val();
+        var endDate = $('#report-end-date').val();
+        $.ajax({
+            url: "{% url 'dashboard_data' %}",
+            method: "GET",
+            data: {
+                'transaction_type': selectedType,
+                'start_date': startDate,
+                'end_date': endDate,
+                'report': 'true'  // Identifier to fetch report-specific data
+            },
+            dataType: "json",
+            success: function(data) {
+                var tbody = $('#recent-transactions-table tbody');
+                tbody.empty();
+                if (data.recent_transactions.length > 0) {
+                    data.recent_transactions.forEach(function(transaction) {
+                        var row = '<tr class="transaction-row" data-type="' + transaction.type.toLowerCase() + '">' +
+                                  '<td>' + transaction.date + '</td>' +
+                                  '<td>' + transaction.type + '</td>' +
+                                  '<td>' + transaction.book + '</td>' +
+                                  '<td>' + transaction.member + '</td>' +
+                                  '</tr>';
+                        tbody.append(row);
+                    });
+                } else {
+                    var row = '<tr><td colspan="4" class="text-center">No data found.</td></tr>';
+                    tbody.append(row);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching report data:', error);
+            }
+        });
+    }
+
+    // Initial dashboard load
+    $(document).ready(function() {
+        // Adjust the height of the transactionsChart container
+        $('.chart-container').css('height', '400px');
+
+        // Load initial graph and report data
+        updateGraph();
+        updateReport();
+
+        // Event listeners for graph filters
+        $('#graph-transaction-type').on('change', function() {
+            updateGraph();
+        });
+
+        // Event listeners for report filters
+        $('#report-transaction-type, #report-start-date, #report-end-date').on('change', function() {
+            updateReport();
+        });
+
+        // Real-time updates every 30 seconds
+        setInterval(function() {
+            updateGraph();
+            updateReport();
+        }, 30000);
+    });
+</script>
 {% endblock %}
